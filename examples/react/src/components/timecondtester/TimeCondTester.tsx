@@ -130,6 +130,13 @@ export const TimeCondTester: React.FC = () => {
       <Card ref={inputCardRef}>
         <CardHeader>
           <CardTitle>Time Condition Input</CardTitle>
+          <CardDescription>
+            For more information, see the{' '}
+            <a className="underline" href="https://github.com/knz/timecond/">
+              GitHub repository
+            </a>
+            .
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
           {parseError && <pre className="text-red-600 whitespace-pre-wrap">{parseError}</pre>}
