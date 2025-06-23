@@ -28,9 +28,9 @@ A reusable TypeScript library for advanced scheduling, filtering, and rule-based
 #### **Example Usage**
 
 ```ts
-import { CondFactory, AndCond } from '@knz/timecond';
-import { defaultTimeConfig } from '@knz/timecond';
+import { CondFactory, AndCond, parse, defaultTimeConfig } from '@knz/timecond';
 
+// --- Classic API (composable objects) ---
 const factory = new CondFactory(defaultTimeConfig);
 const weekdayCond = factory.makeWeekDay('monday');
 const morningCond = factory.dayPart('morning');
@@ -39,6 +39,13 @@ const workdayMorning = new AndCond([weekdayCond, morningCond]);
 const now = new Date();
 console.log('Is now a workday morning?', workdayMorning.inRange(now));
 console.log('Next workday morning starts at:', workdayMorning.nextStart(now));
+
+// --- DSL Parser API ---
+// You can also use the built-in human-friendly DSL parser:
+const expr = 'both monday and morning';
+const cond = parse(expr, defaultTimeConfig); // cond is a Cond instance
+console.log('Is now a workday morning (via DSL)?', cond.inRange(now));
+console.log('Next workday morning (via DSL) starts at:', cond.nextStart(now));
 ```
 
 #### **Supported Condition Types**
