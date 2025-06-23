@@ -18,6 +18,7 @@
       "types": "./dist/index.d.ts"
     }
   },
+  "type": "module",
   "files": [
     "dist"
   ],
@@ -31,11 +32,17 @@
     "moo": "^0.5.2"
   },
   "devDependencies": {
+    "@eslint/js": "^9.21.0",
     "@types/jest": "^30.0.0",
     "@types/moo": "^0.5.10",
+    "@typescript-eslint/eslint-plugin": "^8.29.0",
+    "@typescript-eslint/parser": "^8.29.0",
+    "eslint": "^9.23.0",
     "jest": "^30.0.2",
-    "ts-jest": "^29.4.0",
+    "globals": "^15.15.0",
+    "ts-jest": "^29.3.2",
     "typescript": "^5.0.0",
+    "typescript-eslint": "^8.24.1",
     "vite": "^6.3.5"
   },
   "keywords": [
