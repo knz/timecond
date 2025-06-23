@@ -775,14 +775,14 @@ export const TimeCondInput: React.FC<TimeCondInputProps> = ({
     <div className="flex flex-col gap-2">
       <label>Time Condition</label>
       <div className="flex flex-wrap items-start gap-2 justify-end">
-        <div className="flex flex-1 items-start gap-2 min-w-[60vw]">
+        <div className="flex flex-1 items-start gap-2 min-w-[60%]">
           <Textarea
             ref={textareaRef}
             value={expr}
             onChange={handleInputChange}
             onClick={handleInputClick}
             onKeyUp={handleInputKeyUp}
-            placeholder="try: first morning after start of monday"
+            placeholder="try: first morning after start of monday inclusive"
             autoFocus
             className="text-xs w-full min-h-[40px] resize-none"
             rows={1}
