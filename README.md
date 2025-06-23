@@ -28,7 +28,7 @@ A reusable TypeScript library for advanced scheduling, filtering, and rule-based
 #### **Example Usage**
 
 ```ts
-import { CondFactory } from '@knz/timecond';
+import { CondFactory, AndCond } from '@knz/timecond';
 import { defaultTimeConfig } from '@knz/timecond';
 
 const factory = new CondFactory(defaultTimeConfig);
