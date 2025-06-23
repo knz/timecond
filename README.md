@@ -4,6 +4,8 @@
 
 This repository contains a flexible, composable, and extensible TypeScript library for representing, evaluating, and describing complex conditions on **time ranges**. The support for time ranges is what makes it different from many other popular time scheduling libraries that focus on _events_ (points in time).
 
+**Try it online:** You can view and use the interactive test/demo app at [https://knz.github.io/timecond/](https://knz.github.io/timecond/)
+
 The main library is located in [`packages/timecond`](./packages/timecond), and a test/demo UI is available in [`examples/react`](./examples/react).
 
 ## Main Components
@@ -78,7 +80,9 @@ A React-based demo and test UI for the TimeCond library. This UI allows you to:
 - See human-readable descriptions of parsed conditions
 - Experiment interactively with all features of the library
 
-To run the test UI, see the instructions in [`examples/react`](./examples/react).
+**Try it online:** You can view and use the interactive test/demo app at [https://knz.github.io/timecond/](https://knz.github.io/timecond/)
+
+To run the test UI locally, see the instructions in [`examples/react`](./examples/react).
 
 ---
 
