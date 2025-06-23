@@ -362,31 +362,6 @@ const controlsConfig: ControlConfig[] = [
   {
     type: 'conditional',
     condition: { placeholder: 'expr' },
-    control: { type: 'keyword', keyword: 'either ... or ...', variant: 'default', insertText: 'either <expr> or <expr> <or...>' },
-  },
-  {
-    type: 'conditional',
-    condition: { placeholder: 'or...' },
-    control: { type: 'keyword', keyword: 'or ...', variant: 'default', insertText: 'or <expr> <or...>' },
-  },
-  {
-    type: 'conditional',
-    condition: { placeholder: 'expr' },
-    control: { type: 'keyword', keyword: 'both ... and ...', variant: 'default', insertText: 'both <expr> and <expr> <and...>' },
-  },
-  {
-    type: 'conditional',
-    condition: { placeholder: 'and...' },
-    control: { type: 'keyword', keyword: 'and ...', variant: 'default', insertText: 'and <expr> <and...>' },
-  },
-  {
-    type: 'conditional',
-    condition: { placeholder: 'expr' },
-    control: { type: 'keyword', keyword: '( ... )', variant: 'default', insertText: '(<expr>)' },
-  },
-  {
-    type: 'conditional',
-    condition: { placeholder: 'expr' },
     control: {
       type: 'keyword',
       keyword: 'first ... after start of ...',
@@ -483,6 +458,31 @@ const controlsConfig: ControlConfig[] = [
     type: 'conditional',
     condition: { placeholder: 'expr' },
     control: { type: 'keyword', keyword: 'nth ...', insertText: 'nth <number> <expr>', variant: 'default' },
+  },
+  {
+    type: 'conditional',
+    condition: { placeholder: 'expr' },
+    control: { type: 'keyword', keyword: 'either ... or ...', variant: 'default', insertText: 'either <expr> or <expr> <or...>' },
+  },
+  {
+    type: 'conditional',
+    condition: { placeholder: 'or...' },
+    control: { type: 'keyword', keyword: 'or ...', variant: 'default', insertText: 'or <expr> <or...>' },
+  },
+  {
+    type: 'conditional',
+    condition: { placeholder: 'expr' },
+    control: { type: 'keyword', keyword: 'both ... and ...', variant: 'default', insertText: 'both <expr> and <expr> <and...>' },
+  },
+  {
+    type: 'conditional',
+    condition: { placeholder: 'and...' },
+    control: { type: 'keyword', keyword: 'and ...', variant: 'default', insertText: 'and <expr> <and...>' },
+  },
+  {
+    type: 'conditional',
+    condition: { placeholder: 'expr' },
+    control: { type: 'keyword', keyword: '( ... )', variant: 'default', insertText: '(<expr>)' },
   },
 ];
 

@@ -51,7 +51,13 @@ export const TimeCondTester: React.FC = () => {
   };
 
   const handleNextClick = () => {
-    dateTimePickerRef.current?.querySelector('button')?.focus();
+    if (dateTimePickerRef.current) {
+      dateTimePickerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Focus the first button after scrolling
+      setTimeout(() => {
+        dateTimePickerRef.current?.querySelector('button')?.focus();
+      }, 300); // Delay to allow scroll animation
+    }
   };
 
   const handleExprChange = (newExpr: string) => {
@@ -140,13 +146,13 @@ export const TimeCondTester: React.FC = () => {
             onConfigChange={setConfig}
           />
 
-          <DateTimePicker
-            label="Date/Time of last occurrence (for condition types 'nth' and 'after')"
-            bold={false}
-            value={refDate}
-            onChange={setRefDate}
-          />
           <div ref={dateTimePickerRef}>
+            <DateTimePicker
+              label="Date/Time of last occurrence (for condition types 'nth' and 'after')"
+              bold={false}
+              value={refDate}
+              onChange={setRefDate}
+            />
             <DateTimePicker label="Current Date/Time to evaluate" bold={true} value={selectedDate} onChange={setSelectedDate} />
           </div>
           <div className="flex justify-center pt-4">
