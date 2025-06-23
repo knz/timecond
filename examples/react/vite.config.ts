@@ -5,10 +5,10 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  base: '/timecond/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
-      '@knz/timecond': path.resolve(__dirname, '../../packages/timecond/src'),
     },
   },
 });

@@ -18,8 +18,7 @@
     "baseUrl": "./src",
     "paths": {
       "@/*": ["*"],
-      "@/components/*": ["components/*"],
-      "@knz/timecond": ["../../packages/timecond"]
+      "@/components/*": ["components/*"]
     }
   },
   "include": ["src"],
