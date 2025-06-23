@@ -1,0 +1,12 @@
+src/
+node_modules/
+*.test.ts
+*.spec.ts
+vite.config.ts
+*.log
+.git*
+.DS_Store
+.env*
+.vscode/
+.idea/
+coverage/ 
