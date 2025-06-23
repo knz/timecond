@@ -1,0 +1,48 @@
+{
+  "name": "@knz/timecond",
+  "version": "0.0.1",
+  "description": "A TypeScript library to express and test conditions on time ranges",
+  "author": "Raphael Poss <knz@thaumogen.net>",
+  "license": "AGPL-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/knz/timecond.git",
+    "directory": "packages/timecond"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "typecheck": "tsc --noEmit",
+    "test": "jest"
+  },
+  "dependencies": {
+    "moo": "^0.5.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/moo": "^0.5.10",
+    "jest": "^30.0.2",
+    "ts-jest": "^29.4.0",
+    "typescript": "^5.0.0",
+    "vite": "^6.3.5"
+  },
+  "keywords": [
+    "time",
+    "scheduling",
+    "date",
+    "calendar",
+    "dsl"
+  ]
+}
