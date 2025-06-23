@@ -8,6 +8,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
+      '@knz/timecond': path.resolve(__dirname, '../../packages/timecond/src'),
     },
   },
 });
