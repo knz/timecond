@@ -53,6 +53,7 @@ This module enables you to:
   - `DayBetweenCond` — True between two days of the month (supports month wrap).
   - `DayPartCond` — True during a named part of the day (e.g., "morning").
   - `WeekDay` — True on a specific day of the week.
+  - `MoonPhaseCond` — True around the new or full moon.
 
 - **Combinators:**
 
@@ -70,7 +71,11 @@ This module enables you to:
   - `DescribeVisitor` and `describe()` — Generate human-readable descriptions of conditions.
 
 - **Date Range Utilities:**
+
   - `processRanges`, `unionImpl`, `intersectionImpl`, etc. — Efficient operations on sorted, non-overlapping date ranges.
+
+- **Moon Phases:**
+  - `moonPhaseInstant()`, `previousMoonPhaseInstant()`, `nextMoonPhaseInstant()` — The instants of new and full moons. See "Moon phases" below.
 
 ## Example Usage
 
@@ -110,6 +115,43 @@ Use this module if you need to:
 - `timeCondConfig.ts` — Configuration for localization and day/season definitions.
 - `timeCondDescribe.ts` — Human-readable descriptions for conditions.
 - `timeCondVisitor.ts` — Visitor pattern base class.
+- `moonPhase.ts` — Astronomical computation of new and full moon instants.
+
+## Moon phases
+
+`MoonPhaseCond` is true around the new or full moon. The instants of the
+phases are computed from a closed-form series (Jean Meeus, _Astronomical
+Algorithms_, 2nd ed., chapter 49): the library performs no network
+request and reads no ephemeris file. Meeus reports a maximum deviation of
+about 17 seconds from the full lunar theory over 1980-2020; the times
+produced here agree with published ephemerides to well under a minute in
+the modern era.
+
+A phase is an instant, not an interval, so the condition covers a window
+around it. Two window shapes are available:
+
+- `{ kind: 'day' }` (the default): the whole local calendar day that
+  contains the instant.
+- `{ kind: 'around', beforeMs, afterMs }`: the instant extended by
+  `beforeMs` before and `afterMs` after. The two bounds together must be
+  shorter than a synodic month, so that consecutive windows stay disjoint.
+
+```ts
+import { AndCond, CondFactory, defaultTimeConfig, MoonPhaseCond } from '@knz/timecond';
+
+// The whole day of the next full moon.
+const fullMoonDay = new MoonPhaseCond('fullMoon');
+
+// Within 6 hours of the exact new moon.
+const nearNewMoon = new MoonPhaseCond('newMoon', { kind: 'around', beforeMs: 6 * 3600_000, afterMs: 6 * 3600_000 });
+
+// The night of the full moon.
+const factory = new CondFactory(defaultTimeConfig);
+const fullMoonNight = new AndCond([fullMoonDay, factory.dayPart('night')]);
+```
+
+Note that the day-sized window follows the local calendar day of the
+runtime's timezone, while the phase instant itself is absolute.
 
 ## DSL Syntax
 
@@ -154,6 +196,13 @@ A `condition` can be one of the following:
   - `span of <number> <unit> [, <number> <unit>]...
 
   Where `unit` can be `months`, `days`, `hours`, `minutes`, `seconds`.
+
+- **Moon Phases:**
+
+  - `new moon` : The local day containing the new moon.
+  - `full moon` : The local day containing the full moon.
+  - `new moon within <fractional_number> <unit> [, <fractional_number> <unit>]...` : The given duration before and after the exact instant of the new moon. `unit` can be `days`, `hours`, `minutes`, `seconds`.
+  - `full moon within <fractional_number> <unit> [, <fractional_number> <unit>]...` : Same, for the full moon.
 
 - **Named Conditions (from config):**
   - `weekend`

@@ -1,4 +1,5 @@
 import { TimeConfig } from './config';
+import { MoonPhaseName } from './moonPhase';
 import {
   AndCond,
   Cond,
@@ -8,6 +9,7 @@ import {
   DayPartCond,
   FirstAfterStartCond,
   MonthBetweenCond,
+  MoonPhaseCond,
   NthCond,
   OrCond,
   TimeBetweenCond,
@@ -16,6 +18,34 @@ import {
   WeekDay,
 } from './timeCond';
 import { TimeCondVisitor } from './visitor';
+
+/**
+ * Human-readable names of the supported lunar phases.
+ */
+const moonPhaseNames: { [phase in MoonPhaseName]: string } = {
+  newMoon: 'new moon',
+  fullMoon: 'full moon',
+};
+
+/**
+ * Formats a duration in milliseconds as a compact string, e.g. "1d 12h".
+ * @param milliseconds The duration to format
+ * @returns The formatted duration
+ */
+function formatDuration(milliseconds: number): string {
+  const totalSeconds = milliseconds / 1000;
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = Math.floor(totalSeconds % 60);
+  const parts = [];
+  if (days > 0) parts.push(`${days}d`);
+  if (hours > 0) parts.push(`${hours}h`);
+  if (minutes > 0) parts.push(`${minutes}m`);
+  if (seconds > 0) parts.push(`${seconds}s`);
+  if (parts.length === 0) return '0s';
+  return parts.join(' ');
+}
 
 /**
  * Visitor class that generates human-readable descriptions for conditions.
@@ -52,17 +82,7 @@ export class DescribeVisitor extends TimeCondVisitor {
   }
 
   visitTimeDeltaCond(cond: TimeDeltaCond): void {
-    const deltaInSeconds = cond.delta / 1000;
-    const days = Math.floor(deltaInSeconds / 86400);
-    const hours = Math.floor((deltaInSeconds % 86400) / 3600);
-    const minutes = Math.floor((deltaInSeconds % 3600) / 60);
-    const seconds = Math.floor(deltaInSeconds % 60);
-    const parts = [];
-    if (days > 0) parts.push(`${days}d`);
-    if (hours > 0) parts.push(`${hours}h`);
-    if (minutes > 0) parts.push(`${minutes}m`);
-    if (seconds > 0) parts.push(`${seconds}s`);
-    this.append(`at least ${parts.join(' ')} later`);
+    this.append(`at least ${formatDuration(cond.delta)} later`);
   }
 
   visitTimeBetweenCond(cond: TimeBetweenCond): void {
@@ -90,6 +110,20 @@ export class DescribeVisitor extends TimeCondVisitor {
 
   visitDayPartCond(cond: DayPartCond): void {
     this.append(`during ${cond.dayPart}`);
+  }
+
+  visitMoonPhaseCond(cond: MoonPhaseCond): void {
+    const phaseName = moonPhaseNames[cond.phase];
+    if (cond.window.kind === 'day') {
+      this.append(`on the day of the ${phaseName}`);
+      return;
+    }
+    const { beforeMs, afterMs } = cond.window;
+    if (beforeMs === afterMs) {
+      this.append(`within ${formatDuration(beforeMs)} of the ${phaseName}`);
+    } else {
+      this.append(`from ${formatDuration(beforeMs)} before to ${formatDuration(afterMs)} after the ${phaseName}`);
+    }
   }
 
   visitWeekDay(cond: WeekDay): void {

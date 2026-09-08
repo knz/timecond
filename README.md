@@ -54,6 +54,7 @@ console.log('Next workday morning (via DSL) starts at:', cond.nextStart(now));
 
 - Time of day, day of week, day of month, month, date ranges
 - Named day parts (e.g., "morning"), seasons, custom ranges
+- Lunar phases (new moon, full moon)
 - Logical AND/OR/Nth/FirstAfter combinators
 - Relative and recurring patterns (e.g., "after 2 hours", "nth 3 Monday after...", etc.)
 
@@ -65,6 +66,8 @@ console.log('Next workday morning (via DSL) starts at:', cond.nextStart(now));
 - `nth 2 friday`
 - `daily from 9:00 to 17:00 inclusive`
 - `yearly from december 15 to january 10`
+- `both full moon and night`
+- `new moon within 6 hours`
 
 See the [library README](./packages/timecond/README.md) for full details.
 

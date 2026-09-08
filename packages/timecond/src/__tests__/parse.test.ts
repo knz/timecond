@@ -63,6 +63,20 @@ describe('Time Condition Parser', () => {
     testParse('summerSolstice', 'between Jun 20 and Jun 23');
   });
 
+  describe('Moon Phases', () => {
+    testParse('new moon', 'on the day of the new moon');
+    testParse('full moon', 'on the day of the full moon');
+    testParse('new moon within 6 hours', 'within 6h of the new moon');
+    testParse('full moon within 1.5 days', 'within 1d 12h of the full moon');
+    testParse('full moon within 1 days, 6 hours', 'within 1d 6h of the full moon');
+    testParse('either new moon or full moon', '(on the day of the new moon) OR (on the day of the full moon)');
+    testParse('both full moon and night', '(on the day of the full moon) AND (during night)');
+    testParse(
+      'first evening after start of full moon inclusive',
+      'FIRST (during evening) AFTER START OF (on the day of the full moon) INCLUSIVE'
+    );
+  });
+
   describe('Complex nested expressions', () => {
     testParse(
       'nth 2 first either (daily from 8 to 12 exclusive) or (daily from 14 to 18 exclusive) after start of first workday after start of yearly on date Jan 1 exclusive exclusive',

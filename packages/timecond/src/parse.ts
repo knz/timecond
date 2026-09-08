@@ -1,6 +1,7 @@
 import moo from 'moo';
 import { TimeConfig } from './config';
 import { lexer } from './lex';
+import { MoonPhaseName } from './moonPhase';
 import {
   AndCond,
   Cond,
@@ -11,6 +12,7 @@ import {
   FirstAfterStartCond,
   MonthBetweenCond,
   MonthDay,
+  MoonPhaseCond,
   NthCond,
   OrCond,
   TimeBetweenCond,
@@ -425,10 +427,14 @@ export class Parser {
   private parseTimeDelta(): Cond {
     // after <fractional> seconds/minutes/hours/days -> TimeDeltaCond($1, $2)
     // after <part> [, <part>]...
+    this.matchKw('after');
+    return new TimeDeltaCond(this.refDate, this.parseDuration('after'));
+  }
+
+  private parseDuration(afterKw: string): number {
+    // <fractional> seconds/minutes/hours/days [, <fractional> <unit>]... -> duration in milliseconds
     // fractional:
     //   <number> [. <number>] | . <number>
-    this.matchKw('after');
-
     let totalDelay = 0;
     let hasPart = false;
     while (true) {
@@ -440,7 +446,7 @@ export class Parser {
         }
       } else {
         if (!this.hasNext('number')) {
-          this.error(`Expected a number after "after", got ${this.currentToken?.value}`);
+          this.error(`Expected a number after "${afterKw}", got ${this.currentToken?.value}`);
         }
       }
       hasPart = true;
@@ -465,7 +471,7 @@ export class Parser {
       }
 
       if (!hasNumber) {
-        this.error(`Expected a number after "after", got ${this.currentToken?.value}`);
+        this.error(`Expected a number after "${afterKw}", got ${this.currentToken?.value}`);
       }
 
       let unit = 1;
@@ -488,7 +494,27 @@ export class Parser {
       totalDelay += milliseconds;
     }
 
-    return new TimeDeltaCond(this.refDate, totalDelay);
+    return totalDelay;
+  }
+
+  private parseMoonPhase(): Cond {
+    // new moon [within <duration>] -> MoonPhaseCond('newMoon', ...)
+    // full moon [within <duration>] -> MoonPhaseCond('fullMoon', ...)
+    let phase: MoonPhaseName;
+    if (this.hasKw('new')) {
+      this.matchKw('new');
+      phase = 'newMoon';
+    } else {
+      this.matchKw('full');
+      phase = 'fullMoon';
+    }
+    this.matchKw('moon');
+    if (this.hasKw('within')) {
+      this.matchKw('within');
+      const durationMs = this.parseDuration('within');
+      return new MoonPhaseCond(phase, { kind: 'around', beforeMs: durationMs, afterMs: durationMs });
+    }
+    return new MoonPhaseCond(phase);
   }
 
   private parseSpan(): Cond {
@@ -578,6 +604,9 @@ export class Parser {
     }
     if (this.hasKw('span')) {
       return this.parseSpan();
+    }
+    if (this.hasKw('new') || this.hasKw('full')) {
+      return this.parseMoonPhase();
     }
 
     if (this.currentToken?.type === 'identifier') {

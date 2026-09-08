@@ -5,6 +5,7 @@ import {
   DayPartCond,
   FirstAfterStartCond,
   MonthBetweenCond,
+  MoonPhaseCond,
   NthCond,
   OrCond,
   TimeBetweenCond,
@@ -53,6 +54,12 @@ export abstract class TimeCondVisitor {
    * @param cond The DayPartCond to visit
    */
   abstract visitDayPartCond(cond: DayPartCond): void;
+
+  /**
+   * Visit a MoonPhaseCond
+   * @param cond The MoonPhaseCond to visit
+   */
+  abstract visitMoonPhaseCond(cond: MoonPhaseCond): void;
 
   /**
    * Visit a WeekDay

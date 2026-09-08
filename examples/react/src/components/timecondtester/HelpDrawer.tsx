@@ -69,6 +69,10 @@ export const TimeCondHelpDrawer: React.FC<TimeCondHelpDrawerProps> = ({ open, se
                   january, february, ..., december, spring, summer, fall, winter
                 </code>
               </div>
+              <div>
+                <h5 className="font-medium">Moon Phases</h5>
+                <code className="bg-muted block p-2 rounded-md text-xs">new moon, full moon, full moon within 6 hours</code>
+              </div>
             </div>
           </section>
 

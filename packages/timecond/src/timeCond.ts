@@ -1,5 +1,6 @@
 import { TimeConfig } from './config';
 import { DateRange, inDateRangeImpl, inRangeImpl, intersectionImpl, processRanges, SortedDateRanges, unionImpl } from './dateRangeImpl';
+import { approximateMoonPhaseIndex, MoonPhaseName, moonPhaseInstant, SYNODIC_MONTH_MS } from './moonPhase';
 import { TimeCondVisitor } from './visitor';
 
 /**
@@ -556,6 +557,92 @@ export class DayPartCond extends Cond {
 
   accept(visitor: TimeCondVisitor): void {
     visitor.visitDayPartCond(this);
+  }
+}
+
+/**
+ * How much time around the exact instant of a lunar phase is covered by a
+ * MoonPhaseCond.
+ *
+ * - `day`: the whole local calendar day that contains the instant.
+ * - `around`: the instant itself, extended by `beforeMs` before and
+ *   `afterMs` after it.
+ */
+export type MoonPhaseWindow = { kind: 'day' } | { kind: 'around'; beforeMs: number; afterMs: number };
+
+/**
+ * Condition that is true around the new or full moon.
+ *
+ * The phase instants are computed from a closed-form astronomical series
+ * (see `moonPhase.ts`); no external data source is consulted. Because a
+ * phase is an instant rather than an interval, the condition covers a
+ * window around it, described by the `window` parameter.
+ */
+export class MoonPhaseCond extends Cond {
+  constructor(public readonly phase: MoonPhaseName, public readonly window: MoonPhaseWindow = { kind: 'day' }) {
+    super();
+    if (window.kind === 'around') {
+      if (window.beforeMs < 0 || window.afterMs < 0) {
+        throw new Error('Moon phase window bounds must not be negative');
+      }
+      if (window.beforeMs + window.afterMs <= 0) {
+        throw new Error('Moon phase window must be non-empty');
+      }
+      if (window.beforeMs + window.afterMs >= SYNODIC_MONTH_MS) {
+        throw new Error('Moon phase window must be shorter than a synodic month');
+      }
+    }
+  }
+
+  /**
+   * Returns the range covered around the phase with the given index.
+   * @param index - The index of the phase, as used by `moonPhaseInstant`.
+   * @returns The range covered around that phase.
+   */
+  private rangeForIndex(index: number): DateRange {
+    const instant = moonPhaseInstant(this.phase, index);
+    if (this.window.kind === 'day') {
+      const start = new Date(instant);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(start);
+      end.setDate(end.getDate() + 1);
+      return { start, end };
+    }
+    return {
+      start: new Date(instant.getTime() - this.window.beforeMs),
+      end: new Date(instant.getTime() + this.window.afterMs),
+    };
+  }
+
+  /**
+   * Returns the index of the last range that starts at or before the given date.
+   * The ranges are one synodic month apart and shorter than that, so their
+   * starts are strictly increasing with the index; the approximate index is
+   * refined by walking at most a couple of steps in either direction.
+   * @param date - The reference date.
+   * @returns The index of the range.
+   */
+  private indexAtOrBefore(date: Date): number {
+    let index = approximateMoonPhaseIndex(this.phase, date);
+    while (this.rangeForIndex(index).start > date) {
+      index--;
+    }
+    while (this.rangeForIndex(index + 1).start <= date) {
+      index++;
+    }
+    return index;
+  }
+
+  lastActiveRange(date: Date): DateRange | undefined {
+    return this.rangeForIndex(this.indexAtOrBefore(date));
+  }
+
+  nextRanges(searchAfter: Date): DateRangeSet {
+    return new DateRangeSet([this.rangeForIndex(this.indexAtOrBefore(searchAfter) + 1)]);
+  }
+
+  accept(visitor: TimeCondVisitor): void {
+    visitor.visitMoonPhaseCond(this);
   }
 }
 
