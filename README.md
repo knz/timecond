@@ -100,4 +100,6 @@ Here are some popular time condition libraries. Note that they are all **event-o
 
 ## License
 
-[Apache GPL 2.0](./LICENSE)
+[AGPL-3.0](./LICENSE)
+
+Other licensing terms are available upon request. Contact Raphael Poss <knz@thaumogen.net>.

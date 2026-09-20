@@ -5,7 +5,7 @@
   "description": "Minimal TimeCondTester app for @/timecond library.",
   "author": "Raphael Poss <knz@thaumogen.net>",
   "homepage": "https://knz.github.io/timecond/",
-  "license": "AGPL-2.0",
+  "license": "AGPL-3.0-or-later",
   "type": "module",
   "scripts": {
     "dev": "vite",
