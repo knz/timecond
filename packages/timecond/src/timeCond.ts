@@ -785,6 +785,15 @@ export class WeekDay extends Cond {
  * The condition is true if any of the child conditions are true.
  */
 export class OrCond extends Cond {
+  /**
+   * How far past the reference date lastActiveRange() follows a chain of adjacent
+   * child ranges before it reports the range as open-ended.
+   *
+   * The default is a bit more than one year, so that chains of months, seasons or dates
+   * that stop within a year still get their actual end.
+   */
+  public static extensionHorizonMs = 400 * 24 * 60 * 60 * 1000;
+
   constructor(public readonly conditions: Cond[]) {
     if (conditions.length === 0) {
       throw new Error('At least one condition is required');
@@ -803,7 +812,54 @@ export class OrCond extends Cond {
     if (resultSet.length === 0) {
       return undefined;
     }
-    return resultSet[resultSet.length - 1];
+    const last = resultSet[resultSet.length - 1];
+    if (last.end === undefined || last.end <= date) {
+      // A range that is already over cannot be extended: any child range
+      // starting at or before its end would have been merged above.
+      return last;
+    }
+    return this.extendForward(last, date);
+  }
+
+  /**
+   * Extends the end of an active range with the child ranges that overlap or abut it.
+   *
+   * Each child's lastActiveRange() only looks backwards from the reference date, so
+   * a child range that starts exactly when the current one ends (e.g. sunday after
+   * saturday) is not part of the initial union.
+   *
+   * If the range is still growing once it reaches past extensionHorizonMs after 'date',
+   * the result is reported as open-ended.
+   */
+  private extendForward(range: DateRange, date: Date): DateRange {
+    const limit = date.getTime() + OrCond.extensionHorizonMs;
+    let end = range.end;
+    while (end !== undefined) {
+      if (end.getTime() > limit) {
+        return { start: range.start };
+      }
+      let newEnd: Date | undefined = end;
+      for (const cond of this.conditions) {
+        // The child range with the latest start at or before 'end', if there is one that
+        // reaches past 'end', continues the current range.
+        const next = cond.lastActiveRange(end);
+        if (!next || next.start > end) {
+          continue;
+        }
+        if (next.end === undefined) {
+          newEnd = undefined;
+          break;
+        }
+        if (newEnd !== undefined && next.end > newEnd) {
+          newEnd = next.end;
+        }
+      }
+      if (newEnd === end) {
+        break;
+      }
+      end = newEnd;
+    }
+    return { start: range.start, end };
   }
 
   nextRanges(searchAfter: Date): DateRangeSet {

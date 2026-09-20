@@ -1,6 +1,7 @@
 import { CondFactory, OrCond, TimeBetweenCond } from '../timeCond';
 import { defaultTimeConfig } from '../config';
 import { describe as describeCond } from '../describe';
+import { parse } from '../parse';
 
 describe('OrCond', () => {
   // Helper function to create a simple time range condition
@@ -133,7 +134,7 @@ describe('Weekend', () => {
       const range = weekend.lastActiveRange(saturday);
       expect(range).toBeDefined();
       expect(range?.start.getDay()).toBe(6); // Saturday
-      expect(range?.end?.getDate()).toBe(7); // Next day
+      expect(range?.end?.getDate()).toBe(8); // Monday: the range extends over Sunday
     });
 
     it('should be active on Sunday', () => {
@@ -179,7 +180,7 @@ describe('Weekend', () => {
       const range = weekend.lastActiveRange(friday);
       expect(range).toBeDefined();
       expect(range?.start.getDay()).toBe(5); // Friday
-      expect(range?.end?.getDate()).toBe(6); // Next day
+      expect(range?.end?.getDate()).toBe(7); // Sunday: the range extends over Saturday
     });
 
     it('should be active on Saturday', () => {
@@ -227,7 +228,7 @@ describe('Workday', () => {
       const range = weekday.lastActiveRange(monday);
       expect(range).toBeDefined();
       expect(range?.start.getDay()).toBe(1); // Monday
-      expect(range?.end?.getDate()).toBe(2); // Tuesday
+      expect(range?.end?.getDate()).toBe(6); // Saturday: the range extends over the work week
     });
 
     it('should be active on Friday', () => {
@@ -270,7 +271,7 @@ describe('Workday', () => {
       const range = weekday.lastActiveRange(sunday);
       expect(range).toBeDefined();
       expect(range?.start.getDay()).toBe(0); // Sunday
-      expect(range?.end?.getDate()).toBe(8); // Next day
+      expect(range?.end?.getDate()).toBe(12); // Friday: the range extends over the work week
     });
 
     it('should be active on Thursday', () => {
@@ -304,5 +305,53 @@ describe('Workday', () => {
     it('should return the correct description', () => {
       expect(describeCond(weekday, defaultTimeConfig)).toBe('(Monday) OR (Tuesday) OR (Wednesday) OR (Thursday) OR (Sunday)');
     });
+  });
+});
+
+describe('OrCond adjacent ranges', () => {
+  it('should extend dawn into morning', () => {
+    const cond = parse('either dawn or morning', defaultTimeConfig);
+    const range = cond.lastActiveRange(new Date('2024-01-08T06:00:00'));
+    expect(range?.start).toEqual(new Date('2024-01-08T05:00:00'));
+    expect(range?.end).toEqual(new Date('2024-01-08T12:00:00'));
+    expect(cond.currentEnd(new Date('2024-01-08T06:00:00'))).toEqual(new Date('2024-01-08T12:00:00'));
+  });
+
+  it('should extend over a chain of three days', () => {
+    const cond = parse('either saturday or sunday or monday', defaultTimeConfig);
+    const range = cond.lastActiveRange(new Date('2024-01-06T12:00:00')); // Saturday
+    expect(range?.start).toEqual(new Date('2024-01-06T00:00:00'));
+    expect(range?.end).toEqual(new Date('2024-01-09T00:00:00'));
+  });
+
+  it('should extend over a chain of months', () => {
+    const cond = parse('either september or october or november', defaultTimeConfig);
+    const range = cond.lastActiveRange(new Date('2024-09-10T12:00:00'));
+    expect(range?.start).toEqual(new Date('2024-09-01T00:00:00'));
+    expect(range?.end).toEqual(new Date('2024-12-01T00:00:00'));
+  });
+
+  it('should not extend over a gap', () => {
+    const cond = parse('either saturday or monday', defaultTimeConfig);
+    const range = cond.lastActiveRange(new Date('2024-01-06T12:00:00')); // Saturday
+    expect(range?.end).toEqual(new Date('2024-01-07T00:00:00'));
+  });
+
+  it('should be open-ended when always true', () => {
+    const date = new Date('2024-01-06T12:00:00');
+    for (const expr of ['either weekend or workday', 'either winter or spring or summer or autumn']) {
+      const cond = parse(expr, defaultTimeConfig);
+      const range = cond.lastActiveRange(date);
+      expect(range).toBeDefined();
+      expect(range?.end).toBeUndefined();
+      expect(cond.inRange(date)).toBe(true);
+    }
+  });
+
+  it('should be open-ended when an always-true union is combined with AND', () => {
+    const cond = parse('both either weekend or workday and morning', defaultTimeConfig);
+    const date = new Date('2024-01-06T08:00:00');
+    expect(cond.inRange(date)).toBe(true);
+    expect(cond.currentEnd(date)).toEqual(new Date('2024-01-06T12:00:00'));
   });
 });
